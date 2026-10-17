@@ -1,13 +1,343 @@
 /**
  * Skill Gap Analyzer - Core Client Application JavaScript
+ * Dual-Mode: Communicates with Java Servlets + MySQL backend when available,
+ * and seamlessly provides full in-browser client simulation on static hosts (e.g. Vercel / GitHub Pages).
  */
 
+// =========================================================================
+// MOCK CLIENT-SIDE FALLBACK ENGINE (For Vercel / Static Deployment)
+// =========================================================================
+const ClientData = {
+    ROLES: [
+        { id: 1, title: "Full Stack Java Developer", department: "Software Engineering", avgSalary: "$105,000 - $145,000 / yr", demandLevel: "Very High", icon: "coffee", description: "Build robust, scalable enterprise web applications using Core Java, Spring Boot, Microservices, REST APIs, and modern frontend technologies.",
+          requiredSkills: [
+            { skillId: 1, skillName: "Core Java", skillCategory: "Programming Languages", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 2, skillName: "Spring Boot", skillCategory: "Frameworks & Libraries", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 3, skillName: "MySQL & Relational DBs", skillCategory: "Databases", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 4, skillName: "RESTful APIs", skillCategory: "Core Concepts", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 5, skillName: "HTML5 & CSS3", skillCategory: "Frontend", importance: "Mandatory", weight: 2, minProficiency: "Beginner" },
+            { skillId: 6, skillName: "JavaScript (ES6+)", skillCategory: "Programming Languages", importance: "Mandatory", weight: 2, minProficiency: "Intermediate" },
+            { skillId: 7, skillName: "Git & GitHub", skillCategory: "Tools", importance: "Recommended", weight: 2, minProficiency: "Beginner" },
+            { skillId: 18, skillName: "Hibernate & JPA", skillCategory: "Frameworks & Libraries", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 8, skillName: "Docker & Containerization", skillCategory: "Cloud & DevOps", importance: "Recommended", weight: 2, minProficiency: "Beginner" },
+            { skillId: 19, skillName: "Microservices Architecture", skillCategory: "Core Concepts", importance: "Recommended", weight: 2, minProficiency: "Intermediate" },
+            { skillId: 28, skillName: "Redis & Caching Strategies", skillCategory: "Databases", importance: "Bonus", weight: 1, minProficiency: "Beginner" }
+          ]
+        },
+        { id: 2, title: "Frontend Developer", department: "Web Engineering", avgSalary: "$90,000 - $130,000 / yr", demandLevel: "High", icon: "layout", description: "Design and implement high-performance, responsive, and visually appealing user interfaces using HTML5, CSS3, JavaScript, and modern frontend frameworks.",
+          requiredSkills: [
+            { skillId: 5, skillName: "HTML5 & CSS3", skillCategory: "Frontend", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 6, skillName: "JavaScript (ES6+)", skillCategory: "Programming Languages", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 10, skillName: "React.js", skillCategory: "Frontend", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 25, skillName: "TypeScript", skillCategory: "Frontend", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 4, skillName: "RESTful APIs", skillCategory: "Core Concepts", importance: "Mandatory", weight: 2, minProficiency: "Intermediate" },
+            { skillId: 7, skillName: "Git & GitHub", skillCategory: "Tools", importance: "Recommended", weight: 2, minProficiency: "Beginner" },
+            { skillId: 29, skillName: "GraphQL", skillCategory: "Core Concepts", importance: "Bonus", weight: 1, minProficiency: "Beginner" }
+          ]
+        },
+        { id: 3, title: "Data Scientist & AI Engineer", department: "Data & AI", avgSalary: "$115,000 - $160,000 / yr", demandLevel: "Very High", icon: "cpu", description: "Extract actionable intelligence from large datasets, develop predictive machine learning models, and deploy intelligent AI applications.",
+          requiredSkills: [
+            { skillId: 11, skillName: "Python", skillCategory: "Programming Languages", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 12, skillName: "Pandas & NumPy", skillCategory: "Data & AI", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 13, skillName: "Machine Learning (Scikit-Learn)", skillCategory: "Data & AI", importance: "Mandatory", weight: 3, minProficiency: "Advanced" },
+            { skillId: 14, skillName: "Deep Learning (PyTorch/TensorFlow)", skillCategory: "Data & AI", importance: "Recommended", weight: 2, minProficiency: "Intermediate" },
+            { skillId: 3, skillName: "MySQL & Relational DBs", skillCategory: "Databases", importance: "Mandatory", weight: 2, minProficiency: "Intermediate" },
+            { skillId: 7, skillName: "Git & GitHub", skillCategory: "Tools", importance: "Recommended", weight: 2, minProficiency: "Beginner" },
+            { skillId: 24, skillName: "Data Structures & Algorithms", skillCategory: "Core Concepts", importance: "Recommended", weight: 2, minProficiency: "Intermediate" }
+          ]
+        },
+        { id: 4, title: "DevOps & Cloud Engineer", department: "Cloud & Infrastructure", avgSalary: "$110,000 - $155,000 / yr", demandLevel: "Very High", icon: "cloud", description: "Automate CI/CD pipelines, containerize applications with Docker, orchestrate with Kubernetes, and manage cloud infrastructure on AWS/Azure.",
+          requiredSkills: [
+            { skillId: 15, skillName: "Linux & Shell Scripting", skillCategory: "Cloud & DevOps", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 8, skillName: "Docker & Containerization", skillCategory: "Cloud & DevOps", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 9, skillName: "Kubernetes (K8s)", skillCategory: "Cloud & DevOps", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 16, skillName: "AWS Cloud Foundations", skillCategory: "Cloud & DevOps", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 17, skillName: "CI/CD Pipelines (Jenkins/GitHub Actions)", skillCategory: "Cloud & DevOps", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 7, skillName: "Git & GitHub", skillCategory: "Tools", importance: "Mandatory", weight: 2, minProficiency: "Intermediate" },
+            { skillId: 11, skillName: "Python", skillCategory: "Programming Languages", importance: "Recommended", weight: 2, minProficiency: "Beginner" }
+          ]
+        },
+        { id: 5, title: "Backend Developer", department: "Software Engineering", avgSalary: "$100,000 - $140,000 / yr", demandLevel: "High", icon: "server", description: "Architect secure, high-throughput server-side applications, design relational databases, microservices, and optimize API performance.",
+          requiredSkills: [
+            { skillId: 1, skillName: "Core Java", skillCategory: "Programming Languages", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 2, skillName: "Spring Boot", skillCategory: "Frameworks & Libraries", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 3, skillName: "MySQL & Relational DBs", skillCategory: "Databases", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 4, skillName: "RESTful APIs", skillCategory: "Core Concepts", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 19, skillName: "Microservices Architecture", skillCategory: "Core Concepts", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 28, skillName: "Redis & Caching Strategies", skillCategory: "Databases", importance: "Recommended", weight: 2, minProficiency: "Intermediate" },
+            { skillId: 30, skillName: "System Design", skillCategory: "Core Concepts", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 7, skillName: "Git & GitHub", skillCategory: "Tools", importance: "Recommended", weight: 2, minProficiency: "Beginner" }
+          ]
+        },
+        { id: 6, title: "Cybersecurity Analyst", department: "Information Security", avgSalary: "$98,000 - $142,000 / yr", demandLevel: "High", icon: "shield", description: "Protect IT infrastructure, identify vulnerabilities, perform penetration testing, configure firewalls, and respond to cyber threats.",
+          requiredSkills: [
+            { skillId: 20, skillName: "Network Security & Firewalls", skillCategory: "Cybersecurity", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 21, skillName: "Ethical Hacking & Penetration Testing", skillCategory: "Cybersecurity", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 15, skillName: "Linux & Shell Scripting", skillCategory: "Cloud & DevOps", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 11, skillName: "Python", skillCategory: "Programming Languages", importance: "Recommended", weight: 2, minProficiency: "Beginner" },
+            { skillId: 7, skillName: "Git & GitHub", skillCategory: "Tools", importance: "Bonus", weight: 1, minProficiency: "Beginner" }
+          ]
+        },
+        { id: 7, title: "Android / Mobile Developer", department: "Mobile Engineering", avgSalary: "$92,000 - $135,000 / yr", demandLevel: "Moderate", icon: "smartphone", description: "Develop high quality, user-centric native mobile applications for Android using Kotlin/Java and Android Jetpack libraries.",
+          requiredSkills: [
+            { skillId: 22, skillName: "Kotlin", skillCategory: "Programming Languages", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 23, skillName: "Android Jetpack & SDK", skillCategory: "Mobile Engineering", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 1, skillName: "Core Java", skillCategory: "Programming Languages", importance: "Recommended", weight: 2, minProficiency: "Beginner" },
+            { skillId: 4, skillName: "RESTful APIs", skillCategory: "Core Concepts", importance: "Mandatory", weight: 2, minProficiency: "Intermediate" },
+            { skillId: 7, skillName: "Git & GitHub", skillCategory: "Tools", importance: "Recommended", weight: 2, minProficiency: "Beginner" }
+          ]
+        },
+        { id: 8, title: "Data Engineer", department: "Data & Analytics", avgSalary: "$110,000 - $150,000 / yr", demandLevel: "High", icon: "database", description: "Design, build, and maintain data architectures, ETL pipelines, distributed data stores, and big data warehousing systems.",
+          requiredSkills: [
+            { skillId: 11, skillName: "Python", skillCategory: "Programming Languages", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 3, skillName: "MySQL & Relational DBs", skillCategory: "Databases", importance: "Mandatory", weight: 3, minProficiency: "Advanced" },
+            { skillId: 26, skillName: "Apache Kafka", skillCategory: "Data & Analytics", importance: "Mandatory", weight: 3, minProficiency: "Intermediate" },
+            { skillId: 27, skillName: "MongoDB & NoSQL", skillCategory: "Databases", importance: "Recommended", weight: 2, minProficiency: "Intermediate" },
+            { skillId: 15, skillName: "Linux & Shell Scripting", skillCategory: "Cloud & DevOps", importance: "Recommended", weight: 2, minProficiency: "Intermediate" }
+          ]
+        }
+    ],
+
+    SKILLS_CATALOG: [
+        { id: 1, name: "Core Java", category: "Programming Languages", difficulty: "Intermediate" },
+        { id: 2, name: "Spring Boot", category: "Frameworks & Libraries", difficulty: "Intermediate" },
+        { id: 3, name: "MySQL & Relational DBs", category: "Databases", difficulty: "Beginner" },
+        { id: 4, name: "RESTful APIs", category: "Core Concepts", difficulty: "Intermediate" },
+        { id: 5, name: "HTML5 & CSS3", category: "Frontend", difficulty: "Beginner" },
+        { id: 6, name: "JavaScript (ES6+)", category: "Programming Languages", difficulty: "Intermediate" },
+        { id: 7, name: "Git & GitHub", category: "Tools", difficulty: "Beginner" },
+        { id: 8, name: "Docker & Containerization", category: "Cloud & DevOps", difficulty: "Intermediate" },
+        { id: 9, name: "Kubernetes (K8s)", category: "Cloud & DevOps", difficulty: "Advanced" },
+        { id: 10, name: "React.js", category: "Frontend", difficulty: "Intermediate" },
+        { id: 11, name: "Python", category: "Programming Languages", difficulty: "Beginner" },
+        { id: 12, name: "Pandas & NumPy", category: "Data & AI", difficulty: "Intermediate" },
+        { id: 13, name: "Machine Learning (Scikit-Learn)", category: "Data & AI", difficulty: "Advanced" },
+        { id: 14, name: "Deep Learning (PyTorch/TensorFlow)", category: "Data & AI", difficulty: "Advanced" },
+        { id: 15, name: "Linux & Shell Scripting", category: "Cloud & DevOps", difficulty: "Intermediate" },
+        { id: 16, name: "AWS Cloud Foundations", category: "Cloud & DevOps", difficulty: "Intermediate" },
+        { id: 17, name: "CI/CD Pipelines (Jenkins/GitHub Actions)", category: "Cloud & DevOps", difficulty: "Intermediate" },
+        { id: 18, name: "Hibernate & JPA", category: "Frameworks & Libraries", difficulty: "Intermediate" },
+        { id: 19, name: "Microservices Architecture", category: "Core Concepts", difficulty: "Advanced" },
+        { id: 20, name: "Network Security & Firewalls", category: "Cybersecurity", difficulty: "Intermediate" },
+        { id: 21, name: "Ethical Hacking & Penetration Testing", category: "Cybersecurity", difficulty: "Advanced" },
+        { id: 22, name: "Kotlin", category: "Programming Languages", difficulty: "Intermediate" },
+        { id: 23, name: "Android Jetpack & SDK", category: "Mobile Engineering", difficulty: "Intermediate" },
+        { id: 24, name: "Data Structures & Algorithms", category: "Core Concepts", difficulty: "Intermediate" },
+        { id: 25, name: "TypeScript", category: "Frontend", difficulty: "Intermediate" },
+        { id: 26, name: "Apache Kafka", category: "Data & Analytics", difficulty: "Advanced" },
+        { id: 27, name: "MongoDB & NoSQL", category: "Databases", difficulty: "Intermediate" },
+        { id: 28, name: "Redis & Caching Strategies", category: "Databases", difficulty: "Intermediate" },
+        { id: 29, name: "GraphQL", category: "Core Concepts", difficulty: "Intermediate" },
+        { id: 30, name: "System Design", category: "Core Concepts", difficulty: "Advanced" }
+    ],
+
+    ROADMAPS: {
+        1: [
+            { stepNumber: 1, phaseTitle: "Java Foundations & OOP Principles", description: "Master variables, loops, inheritance, polymorphism, encapsulation, and abstract classes.", estimatedDuration: "2 weeks", resourceTitle: "Oracle Java Documentation", resourceUrl: "https://docs.oracle.com/javase/tutorial/" },
+            { stepNumber: 2, phaseTitle: "Collections Framework & Streams", description: "Deep dive into List, Set, Map, ArrayList vs LinkedList, HashMaps, and functional streams.", estimatedDuration: "2 weeks", resourceTitle: "freeCodeCamp Java Guide", resourceUrl: "https://www.freecodecamp.org/news/java-collections-framework/" },
+            { stepNumber: 3, phaseTitle: "Multithreading & Concurrency", description: "Understand thread lifecycle, synchronization, Executors, and custom exception handling.", estimatedDuration: "1-2 weeks", resourceTitle: "Baeldung Java Concurrency", resourceUrl: "https://www.baeldung.com/java-concurrency" }
+        ],
+        2: [
+            { stepNumber: 1, phaseTitle: "Spring Core & Inversion of Control", description: "Understand Dependency Injection, Beans, Component Scanning, and annotations.", estimatedDuration: "1-2 weeks", resourceTitle: "Spring Quickstart", resourceUrl: "https://spring.io/quickstart" },
+            { stepNumber: 2, phaseTitle: "Building RESTful Web Services", description: "Create controllers, JSON serialization, status codes, and exception handlers.", estimatedDuration: "2 weeks", resourceTitle: "Spring REST Guide", resourceUrl: "https://spring.io/guides/tutorials/rest/" },
+            { stepNumber: 3, phaseTitle: "Data Persistence with Spring Data JPA", description: "Connect to MySQL, derive queries with JpaRepository, and manage transactions.", estimatedDuration: "2 weeks", resourceTitle: "Accessing Data with JPA", resourceUrl: "https://spring.io/guides/gs/accessing-data-jpa/" }
+        ],
+        4: [
+            { stepNumber: 1, phaseTitle: "HTTP Protocol & REST Design Principles", description: "Master HTTP methods (GET, POST, PUT, DELETE), status codes, and statelessness.", estimatedDuration: "1 week", resourceTitle: "RESTful API Design Best Practices", resourceUrl: "https://restfulapi.net/" },
+            { stepNumber: 2, phaseTitle: "JSON Serialization & API Security", description: "Payload validation, JWT tokens, Bearer authentication, and Postman testing.", estimatedDuration: "1 week", resourceTitle: "freeCodeCamp API Development Guide", resourceUrl: "https://www.freecodecamp.org/news/rest-api-design-best-practices/" }
+        ],
+        8: [
+            { stepNumber: 1, phaseTitle: "Containers vs VMs & Docker CLI", description: "Understand images vs containers, pull/run containers, volume mounting, and ports.", estimatedDuration: "1 week", resourceTitle: "Docker 101 Tutorial", resourceUrl: "https://www.docker.com/101-tutorial/" },
+            { stepNumber: 2, phaseTitle: "Writing Production Dockerfiles & Compose", description: "Multi-stage builds, environment variables, and orchestrating with docker-compose.", estimatedDuration: "2 weeks", resourceTitle: "Docker Compose Docs", resourceUrl: "https://docs.docker.com/compose/" }
+        ],
+        10: [
+            { stepNumber: 1, phaseTitle: "React Components, Props & State", description: "Functional components, JSX syntax, passing props, and reactive useState hooks.", estimatedDuration: "2 weeks", resourceTitle: "Official React Documentation", resourceUrl: "https://react.dev/learn" },
+            { stepNumber: 2, phaseTitle: "Lifecycle, Hooks & API Integration", description: "useEffect hook, custom hooks, form handling, and fetching backend data.", estimatedDuration: "2 weeks", resourceTitle: "freeCodeCamp React Guide", resourceUrl: "https://www.freecodecamp.org/news/tag/react/" }
+        ],
+        18: [
+            { stepNumber: 1, phaseTitle: "ORM Basics & Entity Mapping", description: "Annotations (@Entity, @Table, @Id), relationships (@OneToMany, @ManyToMany).", estimatedDuration: "1-2 weeks", resourceTitle: "Baeldung Hibernate JPA Guide", resourceUrl: "https://www.baeldung.com/learn-jpa-hibernate" }
+        ],
+        19: [
+            { stepNumber: 1, phaseTitle: "Microservices Architecture & API Gateway", description: "Domain-Driven Design (DDD), service discovery, API Gateway, and resilient communication.", estimatedDuration: "2-3 weeks", resourceTitle: "Microservices.io Patterns", resourceUrl: "https://microservices.io/" }
+        ]
+    },
+
+    getUser() {
+        let u = localStorage.getItem('sga_user');
+        if (!u) {
+            // Default demo user
+            const demo = {
+                id: 1,
+                fullName: "Alex Morgan",
+                email: "alex@example.com",
+                targetRoleId: 1,
+                targetRoleTitle: "Full Stack Java Developer",
+                experienceLevel: "Intermediate"
+            };
+            localStorage.setItem('sga_user', JSON.stringify(demo));
+            return demo;
+        }
+        return JSON.parse(u);
+    },
+
+    setUser(user) {
+        if (!user) localStorage.removeItem('sga_user');
+        else localStorage.setItem('sga_user', JSON.stringify(user));
+    },
+
+    getUserSkills() {
+        let s = localStorage.getItem('sga_user_skills');
+        if (!s) {
+            // Initial seed skills for Alex Morgan
+            const initial = [
+                { id: 1, skillId: 1, skillName: "Core Java", skillCategory: "Programming Languages", proficiencyLevel: "Intermediate", yearsExperience: 2.0 },
+                { id: 2, skillId: 3, skillName: "MySQL & Relational DBs", skillCategory: "Databases", proficiencyLevel: "Intermediate", yearsExperience: 1.5 },
+                { id: 3, skillId: 5, skillName: "HTML5 & CSS3", skillCategory: "Frontend", proficiencyLevel: "Intermediate", yearsExperience: 2.0 },
+                { id: 4, skillId: 6, skillName: "JavaScript (ES6+)", skillCategory: "Programming Languages", proficiencyLevel: "Beginner", yearsExperience: 1.0 },
+                { id: 5, skillId: 7, skillName: "Git & GitHub", skillCategory: "Tools", proficiencyLevel: "Beginner", yearsExperience: 1.0 }
+            ];
+            localStorage.setItem('sga_user_skills', JSON.stringify(initial));
+            return initial;
+        }
+        return JSON.parse(s);
+    },
+
+    saveUserSkills(skills) {
+        localStorage.setItem('sga_user_skills', JSON.stringify(skills));
+    },
+
+    getLearningProgress() {
+        let p = localStorage.getItem('sga_learning_progress');
+        if (!p) {
+            const initial = [
+                { id: 1, skillId: 2, skillName: "Spring Boot", skillCategory: "Frameworks & Libraries", status: "In Progress", progressPercent: 40, notes: "Currently building a sample RESTful CRUD app using Spring Data JPA." },
+                { id: 2, skillId: 18, skillName: "Hibernate & JPA", skillCategory: "Frameworks & Libraries", status: "In Progress", progressPercent: 25, notes: "Studying entity mappings and lazy loading pitfalls." },
+                { id: 3, skillId: 8, skillName: "Docker & Containerization", skillCategory: "Cloud & DevOps", status: "Not Started", progressPercent: 0, notes: "Plan to start after finishing Spring Boot project." }
+            ];
+            localStorage.setItem('sga_learning_progress', JSON.stringify(initial));
+            return initial;
+        }
+        return JSON.parse(p);
+    },
+
+    saveLearningProgress(items) {
+        localStorage.setItem('sga_learning_progress', JSON.stringify(items));
+    },
+
+    // Gap analysis calculation algorithm (mirroring SkillAnalyzerService.java)
+    calculateGap(roleId) {
+        const user = this.getUser();
+        const role = this.ROLES.find(r => r.id === parseInt(roleId)) || this.ROLES[0];
+        const userSkills = this.getUserSkills();
+
+        const userSkillMap = {};
+        userSkills.forEach(us => { userSkillMap[us.skillId] = us; });
+
+        let matched = [];
+        let missing = [];
+        let totalPossible = 0;
+        let earned = 0;
+
+        const profWeight = { "Beginner": 0.70, "Intermediate": 0.88, "Advanced": 1.0 };
+        const profOrder = { "Beginner": 1, "Intermediate": 2, "Advanced": 3 };
+
+        role.requiredSkills.forEach(req => {
+            const w = req.weight || 2;
+            totalPossible += w;
+
+            if (userSkillMap[req.skillId]) {
+                const us = userSkillMap[req.skillId];
+                const meets = (profOrder[us.proficiencyLevel] || 1) >= (profOrder[req.minProficiency] || 1);
+                earned += (w * (profWeight[us.proficiencyLevel] || 0.75));
+
+                matched.push({
+                    skillId: req.skillId,
+                    skillName: req.skillName,
+                    category: req.skillCategory,
+                    userProficiency: us.proficiencyLevel,
+                    requiredProficiency: req.minProficiency,
+                    importance: req.importance,
+                    meetsRequirement: meets
+                });
+            } else {
+                missing.push(req);
+            }
+        });
+
+        // Extra / Transferable skills
+        const reqSkillIds = new Set(role.requiredSkills.map(r => r.skillId));
+        const transferable = userSkills.filter(us => !reqSkillIds.has(us.skillId));
+
+        const totalReq = role.requiredSkills.length;
+        const directPercent = totalReq > 0 ? Math.round((matched.length / totalReq) * 100) : 0;
+        const weightedPercent = totalPossible > 0 ? Math.round((earned / totalPossible) * 100) : 0;
+
+        // Roadmap steps for missing skills
+        let recommendedRoadmap = [];
+        missing.forEach(m => {
+            const steps = this.ROADMAPS[m.skillId];
+            if (steps) {
+                steps.forEach(s => {
+                    recommendedRoadmap.push({ ...s, skillId: m.skillId, skillName: m.skillName });
+                });
+            }
+        });
+
+        // Readiness level
+        const avgScore = Math.round((directPercent + weightedPercent) / 2);
+        let readinessLevel = "Foundation Builder 🎯";
+        let badgeColor = "danger";
+        let advice = "Early learning phase for this career path. Start with Phase 1 fundamentals in the recommended roadmap.";
+        let weeks = Math.max(4, missing.length * 3);
+
+        if (avgScore >= 80) {
+            readinessLevel = "Job Ready 🚀";
+            badgeColor = "success";
+            advice = "Outstanding match! You possess the primary technical competencies required for this position. Focus on portfolio showcase and behavioral interviews.";
+            weeks = Math.max(1, missing.length * 1);
+        } else if (avgScore >= 60) {
+            readinessLevel = "Interview Ready with Minor Gaps ⚡";
+            badgeColor = "info";
+            advice = "Strong match! You have an excellent base. Mastering the few missing high-priority skills will position you at the top of candidate pools.";
+            weeks = Math.max(2, missing.length * 2);
+        } else if (avgScore >= 35) {
+            readinessLevel = "Intermediate Learner 📈";
+            badgeColor = "warning";
+            advice = "Solid starting foundation. Follow the curated roadmap steps below to systematically close mandatory skill gaps.";
+            weeks = Math.max(3, missing.length * 2);
+        }
+
+        return {
+            roleId: role.id,
+            roleTitle: role.title,
+            department: role.department,
+            avgSalary: role.avgSalary,
+            demandLevel: role.demandLevel,
+            roleDescription: role.description,
+            totalRequiredSkills: totalReq,
+            matchedSkillsCount: matched.length,
+            missingSkillsCount: missing.length,
+            transferableSkillsCount: transferable.length,
+            matchPercentage: directPercent,
+            weightedPercentage: weightedPercent,
+            readinessLevel,
+            readinessBadgeColor: badgeColor,
+            readinessAdvice: advice,
+            estimatedWeeksToClose: weeks,
+            matchedSkills: matched,
+            missingSkills: missing,
+            transferableSkills: transferable,
+            recommendedRoadmap
+        };
+    }
+};
+
+// =========================================================================
+// APPLICATION CONTROLLER
+// =========================================================================
 const App = {
     user: null,
 
-    // =========================================================================
-    // INITIALIZATION & GLOBAL HELPERS
-    // =========================================================================
     async init() {
         await this.checkAuth();
         this.updateNavUI();
@@ -16,15 +346,17 @@ const App = {
     async checkAuth() {
         try {
             const res = await fetch('/api/auth/me');
-            const data = await res.json();
-            if (data.success && data.data) {
-                this.user = data.data;
-            } else {
-                this.user = null;
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.data) {
+                    this.user = data.data;
+                    return;
+                }
             }
         } catch (e) {
-            this.user = null;
+            // Backend offline - use ClientData fallback
         }
+        this.user = ClientData.getUser();
     },
 
     updateNavUI() {
@@ -48,7 +380,7 @@ const App = {
     },
 
     // =========================================================================
-    // AUTHENTICATION METHODS
+    // AUTHENTICATION
     // =========================================================================
     async login(email, password) {
         try {
@@ -57,19 +389,30 @@ const App = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
-            const data = await res.json();
-            if (data.success) {
-                this.showToast('Login successful! Redirecting...', 'success');
-                setTimeout(() => {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const redirect = urlParams.get('redirect') || 'dashboard.html';
-                    window.location.href = redirect;
-                }, 800);
-            } else {
-                this.showToast(data.message || 'Login failed', 'error');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.user = data.data;
+                    ClientData.setUser(data.data);
+                    this.showToast('Login successful! Redirecting...', 'success');
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+                    return;
+                }
             }
-        } catch (err) {
-            this.showToast('Server error during login. Please try again.', 'error');
+        } catch (err) {}
+
+        // Fallback Client Login
+        if (email.toLowerCase().includes('alex') || password === 'demo123') {
+            const u = ClientData.getUser();
+            this.user = u;
+            this.showToast('Login successful! Welcome back, ' + u.fullName, 'success');
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+        } else {
+            const u = { id: Date.now(), fullName: email.split('@')[0], email, targetRoleId: 1, experienceLevel: "Beginner" };
+            this.user = u;
+            ClientData.setUser(u);
+            this.showToast('Signed in successfully!', 'success');
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
         }
     },
 
@@ -80,87 +423,100 @@ const App = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fullName, email, password, targetRoleId, experienceLevel })
             });
-            const data = await res.json();
-            if (data.success) {
-                this.showToast('Account registered successfully! Welcome aboard!', 'success');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 800);
-            } else {
-                this.showToast(data.message || 'Registration failed', 'error');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.user = data.data;
+                    ClientData.setUser(data.data);
+                    this.showToast('Account registered successfully!', 'success');
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+                    return;
+                }
             }
-        } catch (err) {
-            this.showToast('Server error during registration.', 'error');
-        }
+        } catch (err) {}
+
+        // Fallback Client Register
+        const role = ClientData.ROLES.find(r => r.id === parseInt(targetRoleId)) || ClientData.ROLES[0];
+        const newUser = { id: Date.now(), fullName, email, targetRoleId: role.id, targetRoleTitle: role.title, experienceLevel };
+        this.user = newUser;
+        ClientData.setUser(newUser);
+        this.showToast('Account created successfully!', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
     },
 
     async logout() {
-        try {
-            await fetch('/api/auth/logout', { method: 'POST' });
-            this.user = null;
-            this.showToast('Logged out successfully', 'success');
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 600);
-        } catch (e) {
-            window.location.href = 'login.html';
-        }
+        try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+        this.user = null;
+        ClientData.setUser(null);
+        this.showToast('Logged out successfully', 'success');
+        setTimeout(() => { window.location.href = 'login.html'; }, 600);
     },
 
     // =========================================================================
-    // DASHBOARD CONTROLLER
+    // DASHBOARD
     // =========================================================================
     async loadDashboard() {
+        let dashboardData = null;
+
         try {
             const res = await fetch('/api/dashboard');
-            const data = await res.json();
-            if (!data.success) {
-                if (res.status === 401) window.location.href = 'login.html';
-                return;
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) dashboardData = data.data;
             }
+        } catch (err) {}
 
-            const d = data.data;
-            const gap = d.gapAnalysis;
+        // Fallback
+        if (!dashboardData) {
+            const user = ClientData.getUser();
+            const skills = ClientData.getUserSkills();
+            const learning = ClientData.getLearningProgress();
+            const gap = ClientData.calculateGap(user.targetRoleId || 1);
 
-            // Update user welcome
-            const welcomeElem = document.getElementById('user-welcome-name');
-            if (welcomeElem && d.user) welcomeElem.textContent = d.user.fullName;
+            let inProg = learning.filter(l => l.status === 'In Progress').length;
+            let comp = learning.filter(l => l.status === 'Completed').length;
 
-            const roleElem = document.getElementById('user-target-role');
-            if (roleElem && gap) roleElem.textContent = gap.roleTitle || 'Select Target Role';
-
-            // Stats
-            document.getElementById('stat-match-pct').textContent = (gap ? gap.matchPercentage : 0) + '%';
-            document.getElementById('stat-my-skills').textContent = d.totalUserSkills;
-            document.getElementById('stat-missing-skills').textContent = gap ? gap.missingSkillsCount : 0;
-            document.getElementById('stat-in-progress').textContent = d.inProgressCount;
-
-            // Circular Gauge
-            this.renderCircularGauge(gap ? gap.matchPercentage : 0);
-
-            // Match details
-            if (gap) {
-                document.getElementById('match-role-title').textContent = gap.roleTitle;
-                document.getElementById('match-department').textContent = gap.department + ' • ' + (gap.avgSalary || '');
-                
-                const badge = document.getElementById('match-readiness-badge');
-                badge.className = `match-badge badge-${gap.readinessBadgeColor || 'primary'}`;
-                badge.textContent = gap.readinessLevel;
-
-                document.getElementById('match-advice-text').textContent = gap.readinessAdvice;
-                document.getElementById('match-weeks-to-ready').textContent = gap.estimatedWeeksToClose + ' weeks';
-            }
-
-            // Learning Tracker Table
-            this.renderDashboardLearningItems(d.learningItems);
-
-            // User Skills Preview
-            this.renderDashboardSkills(d.userSkills);
-
-        } catch (err) {
-            console.error('Error loading dashboard:', err);
-            this.showToast('Failed to load dashboard data.', 'error');
+            dashboardData = {
+                user,
+                totalUserSkills: skills.length,
+                userSkills: skills,
+                learningItems: learning,
+                inProgressCount: inProg,
+                completedLearningCount: comp,
+                gapAnalysis: gap
+            };
         }
+
+        const d = dashboardData;
+        const gap = d.gapAnalysis;
+
+        const welcomeElem = document.getElementById('user-welcome-name');
+        if (welcomeElem && d.user) welcomeElem.textContent = d.user.fullName;
+
+        const roleElem = document.getElementById('user-target-role');
+        if (roleElem && gap) roleElem.textContent = gap.roleTitle;
+
+        document.getElementById('stat-match-pct').textContent = (gap ? gap.matchPercentage : 0) + '%';
+        document.getElementById('stat-my-skills').textContent = d.totalUserSkills;
+        document.getElementById('stat-missing-skills').textContent = gap ? gap.missingSkillsCount : 0;
+        document.getElementById('stat-in-progress').textContent = d.inProgressCount;
+
+        this.renderCircularGauge(gap ? gap.matchPercentage : 0);
+
+        if (gap) {
+            document.getElementById('match-role-title').textContent = gap.roleTitle;
+            document.getElementById('match-department').textContent = gap.department + ' • ' + (gap.avgSalary || '');
+            
+            const badge = document.getElementById('match-readiness-badge');
+            badge.className = `match-badge badge-${gap.readinessBadgeColor || 'primary'}`;
+            badge.textContent = gap.readinessLevel;
+
+            document.getElementById('match-advice-text').textContent = gap.readinessAdvice;
+            document.getElementById('match-weeks-to-ready').textContent = gap.estimatedWeeksToClose + ' weeks';
+        }
+
+        this.renderDashboardLearningItems(d.learningItems);
+        this.renderDashboardSkills(d.userSkills);
     },
 
     renderCircularGauge(percentage) {
@@ -169,7 +525,6 @@ const App = {
         if (!bar || !text) return;
 
         text.textContent = percentage + '%';
-        // Stroke dasharray for 100 circumference in SVG path
         bar.style.strokeDasharray = `${percentage}, 100`;
 
         bar.className = 'circle-bar';
@@ -241,27 +596,27 @@ const App = {
     },
 
     // =========================================================================
-    // MY SKILLS CONTROLLER
+    // MY SKILLS
     // =========================================================================
     async loadMySkills() {
+        let skills = null;
+        let catalog = null;
+
         try {
-            const [userSkillsRes, catalogRes] = await Promise.all([
-                fetch('/api/skills/user'),
-                fetch('/api/skills')
-            ]);
-
-            const userSkillsData = await userSkillsRes.json();
-            const catalogData = await catalogRes.json();
-
-            if (userSkillsData.success) {
-                this.renderMySkillsGrid(userSkillsData.data);
+            const [uRes, cRes] = await Promise.all([fetch('/api/skills/user'), fetch('/api/skills')]);
+            if (uRes.ok && cRes.ok) {
+                const uData = await uRes.json();
+                const cData = await cRes.json();
+                if (uData.success) skills = uData.data;
+                if (cData.success) catalog = cData.data;
             }
-            if (catalogData.success) {
-                this.populateCatalogSelect(catalogData.data);
-            }
-        } catch (e) {
-            this.showToast('Failed to load skills.', 'error');
-        }
+        } catch (e) {}
+
+        if (!skills) skills = ClientData.getUserSkills();
+        if (!catalog) catalog = ClientData.SKILLS_CATALOG;
+
+        this.renderMySkillsGrid(skills);
+        this.populateCatalogSelect(catalog);
     },
 
     renderMySkillsGrid(skills) {
@@ -286,9 +641,9 @@ const App = {
                 <div>
                     <h4 style="font-size:1.05rem; font-weight:700; color:var(--dark);">${this.escapeHtml(s.skillName)}</h4>
                     <div style="margin-top:0.35rem; display:flex; gap:0.5rem; align-items:center;">
-                        <span class="match-badge badge-primary" style="font-size:0.75rem;">${this.escapeHtml(s.skillCategory)}</span>
+                        <span class="match-badge badge-primary" style="font-size:0.75rem;">${this.escapeHtml(s.skillCategory || 'General')}</span>
                         <span class="level-tag" style="background:#f1f5f9; color:var(--text-main); font-weight:700;">${this.escapeHtml(s.proficiencyLevel)}</span>
-                        <span style="font-size:0.8rem; color:var(--text-muted);">${s.yearsExperience} yr${s.yearsExperience > 1 ? 's' : ''} exp</span>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">${s.yearsExperience || 1} yr${(s.yearsExperience > 1) ? 's' : ''} exp</span>
                     </div>
                 </div>
                 <div>
@@ -302,8 +657,8 @@ const App = {
         const select = document.getElementById('catalog-skill-select');
         if (!select) return;
 
-        select.innerHTML = '<option value="">-- Choose from 30+ Standard Industry Skills --</option>' +
-            catalog.map(s => `<option value="${s.id}" data-category="${this.escapeHtml(s.category)}">${this.escapeHtml(s.name)} (${this.escapeHtml(s.category)})</option>`).join('');
+        select.innerHTML = '<option value="">-- Choose from Standard Industry Skills --</option>' +
+            catalog.map(s => `<option value="${s.id}">${this.escapeHtml(s.name)} (${this.escapeHtml(s.category)})</option>`).join('');
     },
 
     async saveSkillFromForm(e) {
@@ -312,43 +667,55 @@ const App = {
         const customName = document.getElementById('custom-skill-name').value.trim();
         const category = document.getElementById('custom-skill-category').value.trim();
         const proficiency = document.getElementById('skill-proficiency').value;
-        const years = document.getElementById('skill-experience-years').value;
+        const years = parseFloat(document.getElementById('skill-experience-years').value) || 1.0;
 
         if (!skillId && !customName) {
             this.showToast('Please select a catalog skill or enter a custom skill name.', 'warning');
             return;
         }
 
-        const payload = {
-            proficiencyLevel: proficiency,
-            yearsExperience: parseFloat(years) || 1.0
-        };
-
-        if (skillId) {
-            payload.skillId = parseInt(skillId);
-        } else {
-            payload.skillName = customName;
-            payload.category = category || 'General';
-        }
-
         try {
             const res = await fetch('/api/skills/user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ skillId: skillId ? parseInt(skillId) : null, skillName: customName, category, proficiencyLevel: proficiency, yearsExperience: years })
             });
-            const data = await res.json();
-            if (data.success) {
-                this.showToast('Skill added to your profile!', 'success');
-                this.closeModal('add-skill-modal');
-                document.getElementById('add-skill-form').reset();
-                this.loadMySkills();
-            } else {
-                this.showToast(data.message || 'Failed to save skill', 'error');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.showToast('Skill added to your profile!', 'success');
+                    this.closeModal('add-skill-modal');
+                    document.getElementById('add-skill-form').reset();
+                    this.loadMySkills();
+                    return;
+                }
             }
-        } catch (err) {
-            this.showToast('Error saving skill', 'error');
+        } catch (err) {}
+
+        // Fallback Client Save
+        let sName = customName;
+        let sCat = category;
+        let sId = skillId ? parseInt(skillId) : Date.now();
+
+        if (skillId) {
+            const found = ClientData.SKILLS_CATALOG.find(c => c.id === parseInt(skillId));
+            if (found) { sName = found.name; sCat = found.category; }
         }
+
+        const skills = ClientData.getUserSkills();
+        const existingIdx = skills.findIndex(s => s.skillId === sId);
+        if (existingIdx >= 0) {
+            skills[existingIdx].proficiencyLevel = proficiency;
+            skills[existingIdx].yearsExperience = years;
+        } else {
+            skills.push({ id: Date.now(), skillId: sId, skillName: sName, skillCategory: sCat, proficiencyLevel: proficiency, yearsExperience: years });
+        }
+        ClientData.saveUserSkills(skills);
+
+        this.showToast('Skill saved to your profile!', 'success');
+        this.closeModal('add-skill-modal');
+        document.getElementById('add-skill-form').reset();
+        this.loadMySkills();
     },
 
     async deleteSkill(skillId, skillName) {
@@ -356,98 +723,90 @@ const App = {
 
         try {
             const res = await fetch(`/api/skills/user?skillId=${skillId}`, { method: 'DELETE' });
-            const data = await res.json();
-            if (data.success) {
-                this.showToast(`Removed "${skillName}"`, 'success');
-                this.loadMySkills();
-            } else {
-                this.showToast(data.message || 'Failed to delete skill', 'error');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.showToast(`Removed "${skillName}"`, 'success');
+                    this.loadMySkills();
+                    return;
+                }
             }
-        } catch (e) {
-            this.showToast('Error deleting skill', 'error');
-        }
+        } catch (e) {}
+
+        // Fallback Client Delete
+        let skills = ClientData.getUserSkills();
+        skills = skills.filter(s => s.skillId !== parseInt(skillId));
+        ClientData.saveUserSkills(skills);
+        this.showToast(`Removed "${skillName}"`, 'success');
+        this.loadMySkills();
     },
 
     // =========================================================================
-    // SKILL GAP ANALYSIS CONTROLLER
+    // SKILL GAP ANALYSIS
     // =========================================================================
     async initAnalyzePage() {
+        let roles = null;
         try {
-            // Load all roles for selector
-            const resRoles = await fetch('/api/roles');
-            const dataRoles = await resRoles.json();
-            if (dataRoles.success) {
-                const select = document.getElementById('target-role-dropdown');
-                if (select) {
-                    select.innerHTML = dataRoles.data.map(r => `
-                        <option value="${r.id}">${this.escapeHtml(r.title)} (${this.escapeHtml(r.department)})</option>
-                    `).join('');
-                }
+            const res = await fetch('/api/roles');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) roles = data.data;
             }
+        } catch (e) {}
 
-            // Check if URL specifies roleId
+        if (!roles) roles = ClientData.ROLES;
+
+        const select = document.getElementById('target-role-dropdown');
+        if (select) {
+            select.innerHTML = roles.map(r => `
+                <option value="${r.id}">${this.escapeHtml(r.title)} (${this.escapeHtml(r.department)})</option>
+            `).join('');
+
             const urlParams = new URLSearchParams(window.location.search);
             const roleIdParam = urlParams.get('roleId');
-            if (roleIdParam) {
-                const select = document.getElementById('target-role-dropdown');
-                if (select) select.value = roleIdParam;
-            }
-
-            await this.runAnalysis();
-        } catch (e) {
-            this.showToast('Failed to initialize analysis.', 'error');
+            if (roleIdParam) select.value = roleIdParam;
         }
+
+        await this.runAnalysis();
     },
 
     async runAnalysis() {
         const select = document.getElementById('target-role-dropdown');
-        const roleId = select ? select.value : '';
+        const roleId = select ? select.value : '1';
+        let result = null;
 
         try {
-            const url = roleId ? `/api/analyze?roleId=${roleId}` : '/api/analyze';
-            const res = await fetch(url);
-            const data = await res.json();
-
-            if (!data.success) {
-                this.showToast(data.message || 'Analysis failed', 'error');
-                return;
+            const res = await fetch(`/api/analyze?roleId=${roleId}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) result = data.data;
             }
+        } catch (e) {}
 
-            const result = data.data;
-
-            // Render Overview Card
-            this.renderCircularGauge(result.matchPercentage);
-            document.getElementById('analysis-role-title').textContent = result.roleTitle;
-            document.getElementById('analysis-department').textContent = `${result.department} • Avg Salary: ${result.avgSalary}`;
-            document.getElementById('analysis-role-desc').textContent = result.roleDescription;
-
-            const badge = document.getElementById('analysis-readiness-badge');
-            badge.className = `match-badge badge-${result.readinessBadgeColor || 'primary'}`;
-            badge.textContent = result.readinessLevel;
-
-            document.getElementById('analysis-readiness-advice').textContent = result.readinessAdvice;
-            document.getElementById('analysis-est-weeks').textContent = `${result.estimatedWeeksToClose} weeks`;
-
-            document.getElementById('stat-matched-count').textContent = result.matchedSkillsCount;
-            document.getElementById('stat-missing-count').textContent = result.missingSkillsCount;
-            document.getElementById('stat-transferable-count').textContent = result.transferableSkillsCount;
-
-            // Render Matched Skills
-            this.renderMatchedSkills(result.matchedSkills);
-
-            // Render Missing Skills
-            this.renderMissingSkills(result.missingSkills);
-
-            // Render Transferable Skills
-            this.renderTransferableSkills(result.transferableSkills);
-
-            // Render Roadmap preview
-            this.renderRoadmapPreview(result.recommendedRoadmap);
-
-        } catch (e) {
-            console.error('Error running analysis:', e);
-            this.showToast('Error running skill gap analysis', 'error');
+        if (!result) {
+            result = ClientData.calculateGap(roleId);
         }
+
+        this.renderCircularGauge(result.matchPercentage);
+        document.getElementById('analysis-role-title').textContent = result.roleTitle;
+        document.getElementById('analysis-department').textContent = `${result.department} • Avg Salary: ${result.avgSalary}`;
+        document.getElementById('analysis-role-desc').textContent = result.roleDescription;
+
+        const badge = document.getElementById('analysis-readiness-badge');
+        badge.className = `match-badge badge-${result.readinessBadgeColor || 'primary'}`;
+        badge.textContent = result.readinessLevel;
+
+        document.getElementById('analysis-readiness-advice').textContent = result.readinessAdvice;
+        document.getElementById('analysis-est-weeks').textContent = `${result.estimatedWeeksToClose} weeks`;
+
+        document.getElementById('stat-matched-count').textContent = result.matchedSkillsCount;
+        document.getElementById('stat-missing-count').textContent = result.missingSkillsCount;
+        document.getElementById('stat-transferable-count').textContent = result.transferableSkillsCount;
+
+        this.renderMatchedSkills(result.matchedSkills);
+        this.renderMissingSkills(result.missingSkills);
+        this.renderTransferableSkills(result.transferableSkills);
+        this.renderRoadmapPreview(result.recommendedRoadmap);
     },
 
     async setAsTargetRole() {
@@ -461,14 +820,22 @@ const App = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ roleId })
             });
-            const data = await res.json();
-            if (data.success) {
-                this.showToast(data.message, 'success');
-            } else {
-                this.showToast(data.message || 'Failed to update target role', 'error');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.showToast(data.message, 'success');
+                    return;
+                }
             }
-        } catch (e) {
-            this.showToast('Server error setting target role', 'error');
+        } catch (e) {}
+
+        const user = ClientData.getUser();
+        const role = ClientData.ROLES.find(r => r.id === parseInt(roleId));
+        if (role) {
+            user.targetRoleId = role.id;
+            user.targetRoleTitle = role.title;
+            ClientData.setUser(user);
+            this.showToast('Target role updated to: ' + role.title, 'success');
         }
     },
 
@@ -577,83 +944,82 @@ const App = {
     },
 
     // =========================================================================
-    // LEARNING ROADMAP & PROGRESS CONTROLLER
+    // ROADMAP & LEARNING PROGRESS
     // =========================================================================
     async loadRoadmapPage() {
+        let result = null;
         try {
             const res = await fetch('/api/analyze');
-            const data = await res.json();
-            if (!data.success) {
-                this.showToast('Failed to load roadmap.', 'error');
-                return;
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) result = data.data;
             }
+        } catch (e) {}
 
-            const result = data.data;
-            document.getElementById('roadmap-role-title').textContent = result.roleTitle;
-
-            const steps = result.recommendedRoadmap || [];
-            const container = document.getElementById('full-roadmap-timeline');
-
-            if (!container) return;
-            if (steps.length === 0) {
-                container.innerHTML = `
-                    <div class="card" style="text-align:center; padding:3rem;">
-                        <h3 style="color:var(--success);">You Are Fully Job-Ready! 🚀</h3>
-                        <p style="color:var(--text-muted); margin:0.75rem 0 1.5rem;">There are no missing skills for this role! All competencies have been attained.</p>
-                        <a href="roles.html" class="btn btn-primary">Explore Other Career Paths</a>
-                    </div>
-                `;
-                return;
-            }
-
-            // Group steps by skill
-            const skillGroups = {};
-            steps.forEach(s => {
-                if (!skillGroups[s.skillName]) skillGroups[s.skillName] = [];
-                skillGroups[s.skillName].push(s);
-            });
-
-            container.innerHTML = Object.keys(skillGroups).map(skillName => {
-                const skillSteps = skillGroups[skillName];
-                const first = skillSteps[0];
-                return `
-                    <div class="card" style="margin-bottom: 2rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
-                            <div>
-                                <h3 style="font-size:1.35rem; font-weight:800; color:var(--dark);">${this.escapeHtml(skillName)}</h3>
-                                <span style="font-size:0.85rem; color:var(--text-muted);">Curated step-by-step learning track</span>
-                            </div>
-                            <button onclick="App.enrollInLearning(${first.skillId}, '${this.escapeHtml(skillName)}')" class="btn btn-sm btn-primary">
-                                + Enroll in My Progress Tracker
-                            </button>
-                        </div>
-                        <div class="timeline" style="margin-top:0;">
-                            ${skillSteps.map(step => `
-                                <div class="timeline-step">
-                                    <div class="timeline-badge">${step.stepNumber}</div>
-                                    <div class="timeline-card">
-                                        <div class="timeline-header">
-                                            <h4 class="timeline-title">${this.escapeHtml(step.phaseTitle)}</h4>
-                                            <span class="timeline-duration">${this.escapeHtml(step.estimatedDuration)}</span>
-                                        </div>
-                                        <p class="timeline-desc">${this.escapeHtml(step.description)}</p>
-                                        ${step.resourceUrl ? `
-                                            <a href="${step.resourceUrl}" target="_blank" rel="noopener noreferrer" class="timeline-resource">
-                                                📖 ${this.escapeHtml(step.resourceTitle || 'Recommended Resource')} ↗
-                                            </a>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-        } catch (e) {
-            console.error('Error loading roadmap:', e);
-            this.showToast('Error loading roadmap.', 'error');
+        if (!result) {
+            const user = ClientData.getUser();
+            result = ClientData.calculateGap(user.targetRoleId || 1);
         }
+
+        document.getElementById('roadmap-role-title').textContent = result.roleTitle;
+
+        const steps = result.recommendedRoadmap || [];
+        const container = document.getElementById('full-roadmap-timeline');
+
+        if (!container) return;
+        if (steps.length === 0) {
+            container.innerHTML = `
+                <div class="card" style="text-align:center; padding:3rem;">
+                    <h3 style="color:var(--success);">You Are Fully Job-Ready! 🚀</h3>
+                    <p style="color:var(--text-muted); margin:0.75rem 0 1.5rem;">There are no missing skills for this role! All competencies have been attained.</p>
+                    <a href="roles.html" class="btn btn-primary">Explore Other Career Paths</a>
+                </div>
+            `;
+            return;
+        }
+
+        const skillGroups = {};
+        steps.forEach(s => {
+            if (!skillGroups[s.skillName]) skillGroups[s.skillName] = [];
+            skillGroups[s.skillName].push(s);
+        });
+
+        container.innerHTML = Object.keys(skillGroups).map(skillName => {
+            const skillSteps = skillGroups[skillName];
+            const first = skillSteps[0];
+            return `
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                        <div>
+                            <h3 style="font-size:1.35rem; font-weight:800; color:var(--dark);">${this.escapeHtml(skillName)}</h3>
+                            <span style="font-size:0.85rem; color:var(--text-muted);">Curated step-by-step learning track</span>
+                        </div>
+                        <button onclick="App.enrollInLearning(${first.skillId}, '${this.escapeHtml(skillName)}')" class="btn btn-sm btn-primary">
+                            + Enroll in My Progress Tracker
+                        </button>
+                    </div>
+                    <div class="timeline" style="margin-top:0;">
+                        ${skillSteps.map(step => `
+                            <div class="timeline-step">
+                                <div class="timeline-badge">${step.stepNumber}</div>
+                                <div class="timeline-card">
+                                    <div class="timeline-header">
+                                        <h4 class="timeline-title">${this.escapeHtml(step.phaseTitle)}</h4>
+                                        <span class="timeline-duration">${this.escapeHtml(step.estimatedDuration)}</span>
+                                    </div>
+                                    <p class="timeline-desc">${this.escapeHtml(step.description)}</p>
+                                    ${step.resourceUrl ? `
+                                        <a href="${step.resourceUrl}" target="_blank" rel="noopener noreferrer" class="timeline-resource">
+                                            📖 ${this.escapeHtml(step.resourceTitle || 'Recommended Resource')} ↗
+                                        </a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
     },
 
     async enrollInLearning(skillId, skillName) {
@@ -661,22 +1027,29 @@ const App = {
             const res = await fetch('/api/progress/enroll', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    skillId,
-                    status: 'In Progress',
-                    progressPercent: 10,
-                    notes: `Started learning ${skillName}`
-                })
+                body: JSON.stringify({ skillId, status: 'In Progress', progressPercent: 10, notes: `Started learning ${skillName}` })
             });
-            const data = await res.json();
-            if (data.success) {
-                this.showToast(`Enrolled "${skillName}" into your Learning Tracker! 🎯`, 'success');
-            } else {
-                this.showToast(data.message || 'Failed to enroll skill', 'error');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.showToast(`Enrolled "${skillName}" into your Learning Tracker! 🎯`, 'success');
+                    return;
+                }
             }
-        } catch (e) {
-            this.showToast('Error enrolling skill', 'error');
+        } catch (e) {}
+
+        // Fallback Client Enroll
+        const items = ClientData.getLearningProgress();
+        const found = items.find(i => i.skillId === parseInt(skillId));
+        if (found) {
+            found.status = 'In Progress';
+            found.progressPercent = Math.max(10, found.progressPercent);
+        } else {
+            const cat = ClientData.SKILLS_CATALOG.find(c => c.id === parseInt(skillId));
+            items.push({ id: Date.now(), skillId: parseInt(skillId), skillName, skillCategory: cat ? cat.category : 'General', status: 'In Progress', progressPercent: 10, notes: `Started learning ${skillName}` });
         }
+        ClientData.saveLearningProgress(items);
+        this.showToast(`Enrolled "${skillName}" into your Learning Tracker! 🎯`, 'success');
     },
 
     openUpdateProgressModal(skillId, skillName, currentPercent, currentStatus) {
@@ -690,7 +1063,7 @@ const App = {
 
     async submitProgressUpdate(e) {
         e.preventDefault();
-        const skillId = document.getElementById('update-skill-id').value;
+        const skillId = parseInt(document.getElementById('update-skill-id').value);
         const status = document.getElementById('update-progress-status').value;
         const progressPercent = parseInt(document.getElementById('update-progress-percent').value);
         const notes = document.getElementById('update-progress-notes').value.trim();
@@ -701,19 +1074,29 @@ const App = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ skillId, status, progressPercent, notes })
             });
-            const data = await res.json();
-            if (data.success) {
-                this.showToast('Learning progress updated!', 'success');
-                this.closeModal('update-progress-modal');
-                if (window.location.pathname.includes('dashboard')) {
-                    this.loadDashboard();
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.showToast('Learning progress updated!', 'success');
+                    this.closeModal('update-progress-modal');
+                    if (window.location.pathname.includes('dashboard')) this.loadDashboard();
+                    return;
                 }
-            } else {
-                this.showToast(data.message || 'Failed to update progress', 'error');
             }
-        } catch (e) {
-            this.showToast('Error updating progress', 'error');
+        } catch (e) {}
+
+        // Fallback Client Update
+        const items = ClientData.getLearningProgress();
+        const item = items.find(i => i.skillId === skillId);
+        if (item) {
+            item.status = status;
+            item.progressPercent = progressPercent;
+            item.notes = notes;
+            ClientData.saveLearningProgress(items);
         }
+        this.showToast('Learning progress updated!', 'success');
+        this.closeModal('update-progress-modal');
+        if (window.location.pathname.includes('dashboard')) this.loadDashboard();
     },
 
     async completeSkill(skillId) {
@@ -725,61 +1108,83 @@ const App = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ skillId })
             });
-            const data = await res.json();
-            if (data.success) {
-                this.showToast(data.message, 'success');
-                this.loadDashboard();
-            } else {
-                this.showToast(data.message || 'Failed to complete skill', 'error');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    this.showToast(data.message, 'success');
+                    this.loadDashboard();
+                    return;
+                }
             }
-        } catch (e) {
-            this.showToast('Error completing skill', 'error');
+        } catch (e) {}
+
+        // Fallback Client Complete & Promote
+        const sId = parseInt(skillId);
+        const items = ClientData.getLearningProgress();
+        const item = items.find(i => i.skillId === sId);
+        if (item) {
+            item.status = 'Completed';
+            item.progressPercent = 100;
+            ClientData.saveLearningProgress(items);
         }
+
+        const skills = ClientData.getUserSkills();
+        if (!skills.some(s => s.skillId === sId)) {
+            const cat = ClientData.SKILLS_CATALOG.find(c => c.id === sId);
+            skills.push({ id: Date.now(), skillId: sId, skillName: cat ? cat.name : (item ? item.skillName : "Skill"), skillCategory: cat ? cat.category : "General", proficiencyLevel: "Intermediate", yearsExperience: 1.0 });
+            ClientData.saveUserSkills(skills);
+        }
+
+        this.showToast('Congratulations! Skill completed and added to your profile! Your job match score has increased.', 'success');
+        this.loadDashboard();
     },
 
     // =========================================================================
-    // ROLES EXPLORER CONTROLLER
+    // ROLES EXPLORER
     // =========================================================================
     async loadRolesPage() {
+        let roles = null;
         try {
             const res = await fetch('/api/roles');
-            const data = await res.json();
-            if (!data.success) return;
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success) roles = data.data;
+            }
+        } catch (e) {}
 
-            const container = document.getElementById('roles-grid');
-            if (!container) return;
+        if (!roles) roles = ClientData.ROLES;
 
-            container.innerHTML = data.data.map(r => `
-                <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
-                    <div>
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
-                            <span class="match-badge badge-primary" style="font-size:0.75rem;">${this.escapeHtml(r.department)}</span>
-                            <span class="match-badge ${r.demandLevel === 'Very High' ? 'badge-success' : 'badge-info'}" style="font-size:0.75rem;">
-                                ${this.escapeHtml(r.demandLevel)} Demand
-                            </span>
-                        </div>
-                        <h3 style="font-size:1.25rem; font-weight:800; color:var(--dark); margin-bottom:0.5rem;">${this.escapeHtml(r.title)}</h3>
-                        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.5; margin-bottom:1rem;">
-                            ${this.escapeHtml(r.description)}
-                        </p>
-                        <div style="margin-bottom:1rem; font-size:0.875rem;">
-                            <strong style="color:var(--dark);">Avg Salary:</strong> <span style="color:var(--primary); font-weight:700;">${this.escapeHtml(r.avgSalary)}</span>
-                        </div>
+        const container = document.getElementById('roles-grid');
+        if (!container) return;
+
+        container.innerHTML = roles.map(r => `
+            <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+                        <span class="match-badge badge-primary" style="font-size:0.75rem;">${this.escapeHtml(r.department)}</span>
+                        <span class="match-badge ${r.demandLevel === 'Very High' ? 'badge-success' : 'badge-info'}" style="font-size:0.75rem;">
+                            ${this.escapeHtml(r.demandLevel)} Demand
+                        </span>
                     </div>
-                    <div>
-                        <a href="analyze.html?roleId=${r.id}" class="btn btn-outline-primary" style="width:100%;">
-                            Analyze My Fit for This Role →
-                        </a>
+                    <h3 style="font-size:1.25rem; font-weight:800; color:var(--dark); margin-bottom:0.5rem;">${this.escapeHtml(r.title)}</h3>
+                    <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.5; margin-bottom:1rem;">
+                        ${this.escapeHtml(r.description)}
+                    </p>
+                    <div style="margin-bottom:1rem; font-size:0.875rem;">
+                        <strong style="color:var(--dark);">Avg Salary:</strong> <span style="color:var(--primary); font-weight:700;">${this.escapeHtml(r.avgSalary)}</span>
                     </div>
                 </div>
-            `).join('');
-        } catch (e) {
-            this.showToast('Failed to load job roles.', 'error');
-        }
+                <div>
+                    <a href="analyze.html?roleId=${r.id}" class="btn btn-outline-primary" style="width:100%;">
+                        Analyze My Fit for This Role →
+                    </a>
+                </div>
+            </div>
+        `).join('');
     },
 
     // =========================================================================
-    // MODALS & TOAST NOTIFICATION HELPERS
+    // MODALS & TOAST NOTIFICATIONS
     // =========================================================================
     openModal(id) {
         const m = document.getElementById(id);
@@ -824,7 +1229,6 @@ const App = {
     }
 };
 
-// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
     App.init();
 });

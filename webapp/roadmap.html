@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Roadmap | Skill Gap Analyzer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <div class="brand-icon">⚡</div>
+                <span>SkillGap</span> Analyzer
+            </a>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="my-skills.html" class="nav-link">My Skills</a></li>
+                <li><a href="analyze.html" class="nav-link">Analyze Gap</a></li>
+                <li><a href="roadmap.html" class="nav-link active">Roadmap</a></li>
+                <li><a href="roles.html" class="nav-link">Job Roles</a></li>
+            </ul>
+            <div class="nav-actions" id="nav-auth-actions"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Personalized Learning Roadmap</h1>
+                <p class="page-subtitle">Customized learning tracks to bridge missing skills for <strong id="roadmap-role-title" style="color:var(--primary);">Target Role</strong></p>
+            </div>
+            <div>
+                <a href="analyze.html" class="btn btn-outline">← Back to Analysis</a>
+            </div>
+        </div>
+
+        <div id="full-roadmap-timeline">
+            <!-- Injected by app.js -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Skill Gap Analyzer • Built with Core Java, Servlets, JDBC, HTML5, CSS3 & MySQL</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            App.loadRoadmapPage();
+        });
+    </script>
+</body>
+</html>

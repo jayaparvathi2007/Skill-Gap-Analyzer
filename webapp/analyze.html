@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Gap Analysis | Skill Gap Analyzer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <div class="brand-icon">⚡</div>
+                <span>SkillGap</span> Analyzer
+            </a>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="my-skills.html" class="nav-link">My Skills</a></li>
+                <li><a href="analyze.html" class="nav-link active">Analyze Gap</a></li>
+                <li><a href="roadmap.html" class="nav-link">Roadmap</a></li>
+                <li><a href="roles.html" class="nav-link">Job Roles</a></li>
+            </ul>
+            <div class="nav-actions" id="nav-auth-actions"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Target Role Selector Control Bar -->
+        <div class="card" style="margin-bottom: 2rem; padding: 1.25rem 1.5rem; background:#ffffff;">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+                <div style="flex:1; min-width:280px; display:flex; align-items:center; gap:0.75rem;">
+                    <label for="target-role-dropdown" style="font-weight:700; font-size:0.95rem; white-space:nowrap;">Target Job Role:</label>
+                    <select id="target-role-dropdown" class="form-control" onchange="App.runAnalysis()" style="font-weight:600; font-size:0.95rem;">
+                        <!-- Injected by app.js -->
+                    </select>
+                </div>
+                <div style="display:flex; gap:0.75rem;">
+                    <button onclick="App.runAnalysis()" class="btn btn-primary">⚡ Re-calculate Match</button>
+                    <button onclick="App.setAsTargetRole()" class="btn btn-outline" title="Save as primary target role in your profile">📌 Save as My Target</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Match Result Card -->
+        <div class="match-overview-card">
+            <!-- SVG Circular Gauge -->
+            <div class="gauge-container">
+                <svg viewBox="0 0 36 36" class="circular-chart">
+                    <path class="circle-bg"
+                          d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                    <path id="gauge-bar" class="circle-bar primary"
+                          stroke-dasharray="0, 100"
+                          d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                </svg>
+                <div class="gauge-center-text">
+                    <div class="gauge-percent" id="gauge-percentage-text">0%</div>
+                    <div class="gauge-label">Match</div>
+                </div>
+            </div>
+
+            <div class="match-info-content">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem;">
+                    <div>
+                        <h2 class="match-info-title" id="analysis-role-title">Job Role</h2>
+                        <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:0.75rem;" id="analysis-department">Department</div>
+                    </div>
+                    <span id="analysis-readiness-badge" class="match-badge badge-primary">Analyzing...</span>
+                </div>
+                <p id="analysis-role-desc" style="font-size:0.925rem; color:var(--text-muted); margin-bottom:0.75rem;">Role description loading...</p>
+                <div style="background:#ffffff; border:1px solid var(--border); padding:0.85rem 1.25rem; border-radius:var(--radius-md); margin-bottom:1rem;">
+                    <strong style="color:var(--dark);">Strategic Guidance: </strong>
+                    <span id="analysis-readiness-advice" style="color:var(--text-muted);">Advice</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:2rem; font-size:0.9rem;">
+                    <div>Estimated Time to Close Gap: <strong id="analysis-est-weeks" style="color:var(--primary);">—</strong></div>
+                    <a href="roadmap.html" class="btn btn-sm btn-primary">View Learning Roadmap →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Summary Chips -->
+        <div style="display:flex; gap:1.5rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+            <div class="card" style="flex:1; min-width:200px; padding:1rem 1.25rem; border-left:4px solid var(--success);">
+                <span style="font-size:0.85rem; color:var(--text-muted);">Matched Skills</span>
+                <div style="font-size:1.5rem; font-weight:800; color:var(--dark);" id="stat-matched-count">0</div>
+            </div>
+            <div class="card" style="flex:1; min-width:200px; padding:1rem 1.25rem; border-left:4px solid var(--danger);">
+                <span style="font-size:0.85rem; color:var(--text-muted);">Missing / Gap Skills</span>
+                <div style="font-size:1.5rem; font-weight:800; color:var(--dark);" id="stat-missing-count">0</div>
+            </div>
+            <div class="card" style="flex:1; min-width:200px; padding:1rem 1.25rem; border-left:4px solid var(--primary);">
+                <span style="font-size:0.85rem; color:var(--text-muted);">Transferable / Extra Skills</span>
+                <div style="font-size:1.5rem; font-weight:800; color:var(--dark);" id="stat-transferable-count">0</div>
+            </div>
+        </div>
+
+        <!-- Detailed Comparison Columns -->
+        <div class="grid-cols-2" style="margin-bottom:2.5rem; align-items:flex-start;">
+            <!-- Column 1: Missing Skills (Gaps) -->
+            <div>
+                <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="font-size:1.25rem; font-weight:800; color:var(--dark);">⚠️ Missing Skills (Gap Areas)</h3>
+                    <span style="font-size:0.85rem; color:var(--text-muted);">Prioritize these to qualify</span>
+                </div>
+                <div id="missing-skills-container" style="display:flex; flex-direction:column; gap:1rem;">
+                    <!-- Injected by app.js -->
+                </div>
+            </div>
+
+            <!-- Column 2: Matched Skills -->
+            <div>
+                <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="font-size:1.25rem; font-weight:800; color:var(--dark);">✅ Matched Skills (Strengths)</h3>
+                    <span style="font-size:0.85rem; color:var(--text-muted);">Skills you already possess</span>
+                </div>
+                <div id="matched-skills-container" style="display:flex; flex-direction:column; gap:1rem;">
+                    <!-- Injected by app.js -->
+                </div>
+
+                <!-- Transferable Skills Section -->
+                <div style="margin-top:2rem;">
+                    <h3 style="font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:0.75rem;">💡 Additional Transferable Skills</h3>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">Other skills in your profile that add versatile value:</p>
+                    <div id="transferable-skills-container" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+                        <!-- Injected by app.js -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommended Learning Roadmap Section -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <h2 style="font-size:1.35rem; font-weight:800; color:var(--dark);">Recommended Learning Roadmap</h2>
+                    <p style="font-size:0.9rem; color:var(--text-muted);">Curated step-by-step phases to bridge your missing skills</p>
+                </div>
+                <a href="roadmap.html" class="btn btn-primary">Open Full Interactive Roadmap →</a>
+            </div>
+
+            <div id="roadmap-preview-container">
+                <!-- Injected by app.js -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Skill Gap Analyzer • Built with Core Java, Servlets, JDBC, HTML5, CSS3 & MySQL</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            App.initAnalyzePage();
+        });
+    </script>
+</body>
+</html>

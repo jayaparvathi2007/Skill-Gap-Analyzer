@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | Skill Gap Analyzer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <div class="brand-icon">⚡</div>
+                <span>SkillGap</span> Analyzer
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="roles.html" class="nav-link">Job Roles</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-sm btn-outline">Log In</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="auth-wrapper" style="max-width: 480px;">
+            <div class="auth-card">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div class="brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">🚀</div>
+                    <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--dark);">Create Your Account</h1>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Start mapping your technical skills against industry standards</p>
+                </div>
+
+                <form id="register-form">
+                    <div class="form-group">
+                        <label class="form-label" for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" class="form-control" placeholder="e.g. John Doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg-email">Email Address</label>
+                        <input type="email" id="reg-email" class="form-control" placeholder="name@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg-password">Password</label>
+                        <input type="password" id="reg-password" class="form-control" placeholder="Minimum 4 characters" minlength="4" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg-role">Target Job Role (Optional)</label>
+                        <select id="reg-role" class="form-control">
+                            <option value="">-- Select Your Target Role --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg-experience">Current Experience Level</label>
+                        <select id="reg-experience" class="form-control">
+                            <option value="Beginner" selected>Beginner (Student / Fresher / 0-1 yrs)</option>
+                            <option value="Intermediate">Intermediate (1-4 yrs experience)</option>
+                            <option value="Advanced">Advanced (5+ yrs experience)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+                        Create Free Account →
+                    </button>
+                </form>
+
+                <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                    Already have an account? <a href="login.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Sign in here</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Skill Gap Analyzer • Built with Core Java, Servlets, JDBC, HTML5, CSS3 & MySQL</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Fetch roles dynamically to populate target role dropdown
+        fetch('/api/roles')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const sel = document.getElementById('reg-role');
+                    data.data.forEach(r => {
+                        const opt = document.createElement('option');
+                        opt.value = r.id;
+                        opt.textContent = `${r.title} (${r.department})`;
+                        sel.appendChild(opt);
+                    });
+                }
+            })
+            .catch(console.error);
+
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const targetRoleId = document.getElementById('reg-role').value ? parseInt(document.getElementById('reg-role').value) : null;
+            const experienceLevel = document.getElementById('reg-experience').value;
+            App.register(fullName, email, password, targetRoleId, experienceLevel);
+        });
+    </script>
+</body>
+</html>

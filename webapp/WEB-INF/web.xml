@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                             http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <display-name>Skill Gap Analyzer</display-name>
+    <description>
+        Web application for analyzing technical skill gaps, computing job match readiness,
+        recommending personalized learning roadmaps, and tracking learning progress.
+    </description>
+
+    <!-- Welcome File List -->
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+    <!-- Filters -->
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>com.skillgap.filter.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>AuthServlet</servlet-name>
+        <servlet-class>com.skillgap.servlet.AuthServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AuthServlet</servlet-name>
+        <url-pattern>/api/auth/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DashboardServlet</servlet-name>
+        <servlet-class>com.skillgap.servlet.DashboardServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DashboardServlet</servlet-name>
+        <url-pattern>/api/dashboard</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SkillServlet</servlet-name>
+        <servlet-class>com.skillgap.servlet.SkillServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SkillServlet</servlet-name>
+        <url-pattern>/api/skills/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AnalyzeServlet</servlet-name>
+        <servlet-class>com.skillgap.servlet.AnalyzeServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AnalyzeServlet</servlet-name>
+        <url-pattern>/api/analyze/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ProgressServlet</servlet-name>
+        <servlet-class>com.skillgap.servlet.ProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ProgressServlet</servlet-name>
+        <url-pattern>/api/progress/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>RoleServlet</servlet-name>
+        <servlet-class>com.skillgap.servlet.RoleServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RoleServlet</servlet-name>
+        <url-pattern>/api/roles/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Session Configuration -->
+    <session-config>
+        <session-timeout>60</session-timeout> <!-- 60 minutes -->
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
+</web-app>

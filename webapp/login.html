@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In | Skill Gap Analyzer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <div class="brand-icon">⚡</div>
+                <span>SkillGap</span> Analyzer
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="roles.html" class="nav-link">Job Roles</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="register.html" class="btn btn-sm btn-primary">Create Account</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="auth-wrapper">
+            <div class="auth-card">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div class="brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">⚡</div>
+                    <h1 style="font-size: 1.5rem; font-weight: 800; color: var(--dark);">Welcome Back</h1>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">Sign in to analyze your skills & view your dashboard</p>
+                </div>
+
+                <form id="login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="login-email">Email Address</label>
+                        <input type="email" id="login-email" class="form-control" placeholder="name@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+                        Sign In to Dashboard →
+                    </button>
+                </form>
+
+                <!-- 1-Click Demo Login Button -->
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); text-align: center;">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Want to test without registering?</p>
+                    <button type="button" id="demo-fill-btn" class="btn btn-outline-primary btn-sm" style="width: 100%;">
+                        ⚡ Quick Demo: Log in as Alex Morgan
+                    </button>
+                </div>
+
+                <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                    Don't have an account? <a href="register.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Sign up here</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Skill Gap Analyzer • Built with Core Java, Servlets, JDBC, HTML5, CSS3 & MySQL</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            App.login(email, password);
+        });
+
+        document.getElementById('demo-fill-btn').addEventListener('click', () => {
+            document.getElementById('login-email').value = 'alex@example.com';
+            document.getElementById('login-password').value = 'demo123';
+            App.login('alex@example.com', 'demo123');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Skills | Skill Gap Analyzer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="brand">
+                <div class="brand-icon">⚡</div>
+                <span>SkillGap</span> Analyzer
+            </a>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="my-skills.html" class="nav-link active">My Skills</a></li>
+                <li><a href="analyze.html" class="nav-link">Analyze Gap</a></li>
+                <li><a href="roadmap.html" class="nav-link">Roadmap</a></li>
+                <li><a href="roles.html" class="nav-link">Job Roles</a></li>
+            </ul>
+            <div class="nav-actions" id="nav-auth-actions"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">My Technical Skills</h1>
+                <p class="page-subtitle">Manage your existing technical abilities and experience levels</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <span class="match-badge badge-primary">Total Skills: <strong id="total-skills-count">0</strong></span>
+                <button onclick="App.openModal('add-skill-modal')" class="btn btn-primary">+ Add New Skill</button>
+            </div>
+        </div>
+
+        <!-- Skills Grid -->
+        <div class="grid-cols-3" id="my-skills-grid">
+            <!-- Injected by app.js -->
+        </div>
+    </main>
+
+    <!-- Modal: Add / Edit Skill -->
+    <div class="modal-overlay" id="add-skill-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">+ Add Technical Skill</h3>
+                <button class="modal-close" onclick="App.closeModal('add-skill-modal')">&times;</button>
+            </div>
+            <form id="add-skill-form" onsubmit="App.saveSkillFromForm(event)">
+                <!-- Option A: Catalog Dropdown -->
+                <div class="form-group">
+                    <label class="form-label" for="catalog-skill-select">Select From Standard Skill Catalog</label>
+                    <select id="catalog-skill-select" class="form-control">
+                        <option value="">-- Choose a Skill --</option>
+                    </select>
+                </div>
+
+                <div style="text-align:center; margin: 1rem 0; color:var(--text-muted); font-size:0.85rem; position:relative;">
+                    <span style="background:white; padding: 0 10px; position:relative; z-index:1;">OR ENTER CUSTOM SKILL</span>
+                    <hr style="position:absolute; top:50%; width:100%; border:none; border-top:1px solid var(--border); z-index:0;">
+                </div>
+
+                <!-- Option B: Custom Skill Entry -->
+                <div class="form-group">
+                    <label class="form-label" for="custom-skill-name">Custom Skill Name</label>
+                    <input type="text" id="custom-skill-name" class="form-control" placeholder="e.g. Flutter, Rust, GraphQL, NestJS">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="custom-skill-category">Skill Category</label>
+                    <select id="custom-skill-category" class="form-control">
+                        <option value="Programming Languages">Programming Languages</option>
+                        <option value="Frameworks & Libraries">Frameworks & Libraries</option>
+                        <option value="Databases">Databases</option>
+                        <option value="Cloud & DevOps">Cloud & DevOps</option>
+                        <option value="Frontend">Frontend</option>
+                        <option value="Data & AI">Data & AI</option>
+                        <option value="Tools">Tools</option>
+                        <option value="Core Concepts">Core Concepts</option>
+                    </select>
+                </div>
+
+                <!-- Proficiency Level -->
+                <div class="form-group">
+                    <label class="form-label" for="skill-proficiency">Your Proficiency Level</label>
+                    <select id="skill-proficiency" class="form-control" required>
+                        <option value="Beginner">Beginner (Foundational understanding / Basic usage)</option>
+                        <option value="Intermediate" selected>Intermediate (Hands-on experience / Projects)</option>
+                        <option value="Advanced">Advanced (Deep expertise / Production experience)</option>
+                    </select>
+                </div>
+
+                <!-- Years Experience -->
+                <div class="form-group">
+                    <label class="form-label" for="skill-experience-years">Years of Experience</label>
+                    <input type="number" id="skill-experience-years" class="form-control" min="0.1" max="40" step="0.5" value="1.0" required>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+                    <button type="button" class="btn btn-outline" onclick="App.closeModal('add-skill-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Skill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Skill Gap Analyzer • Built with Core Java, Servlets, JDBC, HTML5, CSS3 & MySQL</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            App.loadMySkills();
+        });
+    </script>
+</body>
+</html>

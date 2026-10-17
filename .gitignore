@@ -1,0 +1,24 @@
+# Compiled classes and packaging
+/bin/
+*.class
+*.war
+/build/
+/target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary log / test files
+*.log
+cookies.txt
+sources.txt
